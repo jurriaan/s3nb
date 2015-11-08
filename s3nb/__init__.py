@@ -12,5 +12,11 @@ try:
 except ImportError:
     pass
 
+try:
+    from .jupyter4 import S3ContentsManager
+    imported = True
+except ImportError:
+    pass
+
 if not imported:
     raise ImportError("failed to import any s3nb managers")
