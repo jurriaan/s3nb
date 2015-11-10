@@ -277,7 +277,7 @@ class S3ContentsManager(ContentsManager):
         k.key = self._path_to_s3_key(path)
 
         with tempfile.NamedTemporaryFile() as f:
-            f.write(contenttor)
+            f.write(content)
             f.seek(0)
             k.set_contents_from_file(f)
 
@@ -288,11 +288,8 @@ class S3ContentsManager(ContentsManager):
         k.key = self._path_to_s3_key(path)
 
         try:
-            with tempfile.NamedTemporaryFile() as t, codecs.open(t.name, mode='w', encoding='utf-8') as f:
-                # write tempfile with utf-8 encoding
-                nbformat.write(nb, f, version=nbformat.NO_CONVERT)
-                # upload as bytes (t's fp didn't advance)
-                k.set_contents_from_file(t)
+            notebook_json = nbformat.writes(nb, version=nbformat.NO_CONVERT)
+            k.set_contents_from_string(notebook_json)
         except Exception as e:
             raise web.HTTPError(400, u"Unexpected Error Writing Notebook: %s %s" % (path, e))
 
