@@ -1,6 +1,7 @@
 import boto
 import codecs
 import datetime
+import os
 import pytz as tz
 import tempfile
 
@@ -95,13 +96,14 @@ class S3ContentsManager(ContentsManager):
     def __init__(self, **kwargs):
         super(S3ContentsManager, self).__init__(**kwargs)
         config = self.config[self.__class__.__name__]  # this still can't be right
-        self.s3_base_uri = config['s3_base_uri']
+        self.s3_base_uri = config.get('s3_base_uri', kwargs.get('s3_base_uri'))
         self.s3_key_delimiter = config.get('s3_key_delimiter', '/')
         self.s3_bucket, self.s3_prefix = self._parse_s3_uri(self.s3_base_uri, self.s3_key_delimiter)
         # ensure prefix ends with the delimiter
         if not self.s3_prefix.endswith(self.s3_key_delimiter) and self.s3_prefix != '':
             self.s3_prefix += self.s3_key_delimiter
-        self.s3_connection = boto.connect_s3()
+        print('{} {}'.format(os.environ.get('AWS_ACCESS_KEY_ID'), os.environ.get('AWS_SECRET_ACCESS_KEY')))
+        self.s3_connection = boto.connect_s3(os.environ.get('AWS_ACCESS_KEY_ID'), os.environ.get('AWS_SECRET_ACCESS_KEY'))
         self.bucket = self.s3_connection.get_bucket(self.s3_bucket)
         self.log.debug("initialized base_uri: %s bucket: %s prefix: %s",
             self.s3_base_uri, self.s3_bucket, self.s3_prefix)
@@ -275,7 +277,7 @@ class S3ContentsManager(ContentsManager):
         k.key = self._path_to_s3_key(path)
 
         with tempfile.NamedTemporaryFile() as f:
-            f.write(content)
+            f.write(contenttor)
             f.seek(0)
             k.set_contents_from_file(f)
 
