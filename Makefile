@@ -30,3 +30,7 @@ restart: kill run;
 
 run:
 	${SSH} -c "tmux new-session -d -n run -s server 'PYTHONPATH=/vagrant ipython notebook --ipython-dir=${IPYTHON_DIR} --profile=s3nb --ip=0.0.0.0 --no-browser > /vagrant/s3nb.log 2>&1'"
+
+
+patch-boto:
+	patch .tox/py34/lib/python3.4/site-packages/boto/connection.py < boto-python3-proxy.patch

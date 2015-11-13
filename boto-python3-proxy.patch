@@ -1,0 +1,41 @@
+--- boto-2.38.0/boto/connection.py	2015-04-09 11:58:52.000000000 -0700
++++ /opt/sandbox/vertica-notebook/jupyter/boto-2.38.0/boto/connection.py	2015-11-12 19:04:54.148556641 -0800
+@@ -69,6 +69,13 @@
+ from boto.provider import Provider
+ from boto.resultset import ResultSet
+ 
++def to_bytes(bytes_or_str):
++    if isinstance(bytes_or_str, str):
++        value = bytes_or_str.encode('utf-8')
++    else:
++        value = bytes_or_str
++    return value # Instance of bytes
++
+ HAVE_HTTPS_CONNECTION = False
+ try:
+     import ssl
+@@ -793,18 +800,18 @@
+         else:
+             sock = socket.create_connection((self.proxy, int(self.proxy_port)))
+         boto.log.debug("Proxy connection: CONNECT %s HTTP/1.0\r\n", host)
+-        sock.sendall("CONNECT %s HTTP/1.0\r\n" % host)
+-        sock.sendall("User-Agent: %s\r\n" % UserAgent)
++        sock.sendall(to_bytes("CONNECT %s HTTP/1.0\r\n" % host))
++        sock.sendall(to_bytes("User-Agent: %s\r\n" % UserAgent))
+         if self.proxy_user and self.proxy_pass:
+             for k, v in self.get_proxy_auth_header().items():
+-                sock.sendall("%s: %s\r\n" % (k, v))
++                sock.sendall(to_bytes("%s: %s\r\n" % (k, v)))
+             # See discussion about this config option at
+             # https://groups.google.com/forum/?fromgroups#!topic/boto-dev/teenFvOq2Cc
+             if config.getbool('Boto', 'send_crlf_after_proxy_auth_headers', False):
+-                sock.sendall("\r\n")
++                sock.sendall(to_bytes("\r\n"))
+         else:
+-            sock.sendall("\r\n")
+-        resp = http_client.HTTPResponse(sock, strict=True, debuglevel=self.debug)
++            sock.sendall(to_bytes("\r\n"))
++        resp = http_client.HTTPResponse(sock, debuglevel=self.debug)
+         resp.begin()
+ 
+         if resp.status != 200:
