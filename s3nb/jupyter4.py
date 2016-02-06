@@ -102,11 +102,7 @@ class S3ContentsManager(ContentsManager):
         # ensure prefix ends with the delimiter
         if not self.s3_prefix.endswith(self.s3_key_delimiter) and self.s3_prefix != '':
             self.s3_prefix += self.s3_key_delimiter
-        if not 'AWS_ACCESS_KEY_ID' in os.environ or \
-           not 'AWS_SECRET_ACCESS_KEY' in os.environ:
-            print('WARNING: need to define AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env vars')
-        #print('{} {}'.format(os.environ.get('AWS_ACCESS_KEY_ID'), os.environ.get('AWS_SECRET_ACCESS_KEY')))
-        self.s3_connection = boto.connect_s3(os.environ.get('AWS_ACCESS_KEY_ID'), os.environ.get('AWS_SECRET_ACCESS_KEY'))
+        self.s3_connection = boto.connect_s3(host='s3.eu-central-1.amazonaws.com')
         self.bucket = self.s3_connection.get_bucket(self.s3_bucket)
         self.log.debug("initialized base_uri: %s bucket: %s prefix: %s",
             self.s3_base_uri, self.s3_bucket, self.s3_prefix)
